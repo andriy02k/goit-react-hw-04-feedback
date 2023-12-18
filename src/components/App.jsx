@@ -1,54 +1,61 @@
-import { Component } from 'react'
+import React, { useState } from 'react'
 import FeedbackOptions from './FeedbackOptions/FeedbackOptions'
 import Statistics from './Statistics/Statistics'
 import Section from './Section/Section'
 import Notification from './Notification/Notification'
 
-export class App extends Component {
-    state = {
-        good: 0,
-        neutral: 0,
-        bad: 0,
-    }
-    
-    updateFeedback = (feedbackType) => {
-      this.setState((prev) => ({
-        [feedbackType]: prev[feedbackType] + 1
-      }));
-    }
-  
-    calculateTotal = () => {
-      const { good, neutral, bad } = this.state;
-      return good + neutral + bad;
-    }
-  
-  calculatePercent = () => {
-        return this.calculateTotal() > 0 ? Math.round((this.state.good / this.calculateTotal()) * 100) : 0;
-    }
+export const App = () => {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
 
-  render() {
-        const conditionRender = this.calculateTotal() > 0;
-    
-        return (
-          <>
-            <Section title="Please leave feedback">
-              <FeedbackOptions options={Object.keys(this.state)} onLeaveFeedback={this.updateFeedback}/>
-            </Section>
-            <Section title="Statistics">
-              {conditionRender ? (
-                <Statistics
-                  good={this.state.good}
-                  neutral={this.state.neutral}
-                  bad={this.state.bad}
-                  total={this.calculateTotal()}
-                  goodPersent={this.calculatePercent()}
-                />
-              ) : (
-                  <Notification message="There is no feedback"/>
-              )}
-            </Section>
-          </>
-        );
-    };
+  const updateFeedback = (feedbackType) => {
+      switch (feedbackType) {
+        case 'good':
+          setGood((prevGood) => prevGood + 1);
+          break;
+        case 'neutral':
+          setNeutral((prevNeutral) => prevNeutral + 1);
+          break;
+        case 'bad':
+          setBad((prevBad) => prevBad + 1);
+          break;
+        default:
+      }
+  }
+  
+  const calculateTotal = () => {
+    return good + neutral + bad;
+  }
+  
+  const calculatePercent = () => {
+        return calculateTotal() > 0 ? Math.round((good / calculateTotal()) * 100) : 0;
+  }
+
+  const conditionRender = calculateTotal() > 0;
+
+  return (
+    <>
+      <Section title="Please leave feedback">
+        <FeedbackOptions
+          options={['good', 'neutral', 'bad']}
+          onLeaveFeedback={updateFeedback}
+        />
+      </Section>
+      <Section title="Statistics">
+        {conditionRender ? (
+          <Statistics
+            neutral={neutral}
+            good={good}
+            bad={bad}
+            total={calculateTotal()}
+            goodPersent={calculatePercent()}
+          />
+        ) : (
+          <Notification message="There is no feedback"/>
+        )}
+      </Section>
+    </>
+  )
 }
 
